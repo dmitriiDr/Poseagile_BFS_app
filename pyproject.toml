@@ -11,6 +11,8 @@ requires-python = "^3.10"
 dependencies = [
 ]
 
+[tool.poetry.scripts]
+hello-app = "hello_app.main:say_hello"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
