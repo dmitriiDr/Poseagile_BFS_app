@@ -1,6 +1,7 @@
 __pycache__/
 fitness_poses_images_in/
-fitness_poses_images_out
+fitness_poses_images_out/
+fitness_poses_csvs_out/
 *.ipynb
 *.mp4
-*.csv
+fitness_poses_csvs_out.csv
