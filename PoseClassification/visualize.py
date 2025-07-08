@@ -41,6 +41,9 @@ class PoseClassificationVisualizer(object):
 
         self._pose_classification_history = []
         self._pose_classification_filtered_history = []
+        self._pose_hold_frame_count = 0 # gpt
+        self._pose_hold_duration_sec = 0
+        self._fps = None  # Set this from the outside, when known
 
     def __call__(
         self,
@@ -53,7 +56,21 @@ class PoseClassificationVisualizer(object):
         # Extend classification history.
         self._pose_classification_history.append(pose_classification)
         self._pose_classification_filtered_history.append(pose_classification_filtered)
+#==========================================================
+        # Duration tracking (only if classification confidence is high)
+        confidence_threshold = 6  # You can tune this
+        current_confidence = 0
+        if pose_classification_filtered is not None:
+            current_confidence = pose_classification_filtered.get(self._class_name, 0)
 
+        if current_confidence > confidence_threshold:
+            self._pose_hold_frame_count += 1
+        else:
+            self._pose_hold_frame_count = 0  # Reset if pose not held
+
+        if self._fps:
+            self._pose_hold_duration_sec = self._pose_hold_frame_count / self._fps
+#==========================================================
         # Output frame with classification plot and counter.
         output_img = Image.fromarray(frame)
 
@@ -94,7 +111,19 @@ class PoseClassificationVisualizer(object):
             font=self._counter_font,
             fill=self._counter_font_color,
         )
-
+#==========================================================
+        if self._fps:
+            duration_text = f"{self._pose_hold_duration_sec:.1f}s"
+            output_img_draw.text(
+                (
+                    output_width * self._counter_location_x,
+                    output_height * (self._counter_location_y + 0.2),
+                ),
+                duration_text,
+                font=self._counter_font,
+                fill="blue",
+            )
+#==========================================================
         return output_img
 
     def _plot_classification_history(self, output_width, output_height):
