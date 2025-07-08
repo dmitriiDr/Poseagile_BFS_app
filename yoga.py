@@ -118,5 +118,5 @@ pose_tracker.close()
 cv2.destroyAllWindows()
 
 # Show the last frame
-if output_frame is not None:
-    show_image(output_frame)
+# if output_frame is not None:
+#     show_image(output_frame)
