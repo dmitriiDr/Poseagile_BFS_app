@@ -97,20 +97,21 @@ class PoseClassificationVisualizer(object):
         # Draw the count.
         output_img_draw = ImageDraw.Draw(output_img)
         if self._counter_font is None:
-            font_size = int(output_height * self._counter_font_size)
+            font_size = int(output_height * self._counter_font_size) * 0.5
             font_request = requests.get(self._counter_font_path, allow_redirects=True)
             self._counter_font = ImageFont.truetype(
                 io.BytesIO(font_request.content), size=font_size
             )
-        output_img_draw.text(
-            (
-                output_width * self._counter_location_x,
-                output_height * self._counter_location_y,
-            ),
-            str(repetitions_count),
-            font=self._counter_font,
-            fill=self._counter_font_color,
-        )
+# FOR COUNTER===============================================
+        # output_img_draw.text(
+        #     (
+        #         output_width * self._counter_location_x,
+        #         output_height * self._counter_location_y,
+        #     ),
+        #     str(repetitions_count),
+        #     font=self._counter_font,
+        #     fill=self._counter_font_color,
+        # )
 #==========================================================
         if self._fps:
             duration_text = f"{self._pose_hold_duration_sec:.1f}s"
@@ -123,6 +124,18 @@ class PoseClassificationVisualizer(object):
                 font=self._counter_font,
                 fill="blue",
             )
+            # Pose name
+            if current_confidence > confidence_threshold:
+                pose_text = self._class_name
+                output_img_draw.text(
+                    (
+                        output_width * self._counter_location_x*0.7,
+                        output_height * self._counter_location_y,
+                    ),
+                    pose_text,
+                    font=self._counter_font,
+                    fill=self._counter_font_color,
+                )
 #==========================================================
         return output_img
 
