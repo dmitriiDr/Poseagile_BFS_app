@@ -96,28 +96,97 @@ class PoseClassificationVisualizer(object):
             self._counter_font = ImageFont.truetype(io.BytesIO(font_request.content), size=font_size)
             self._last_output_height = output_height
 
-        if self._fps:
-            duration_text = f"{self._pose_hold_duration_sec:.1f}s"
-            output_img_draw.text(
-                (
-                    output_width * self._counter_location_x * 0.85,
-                    output_height * (self._counter_location_y),
-                ),
-                duration_text,
-                font=self._counter_font,
-                fill="blue",
-            )
+        # if self._fps:
+        #     duration_text = f"{self._pose_hold_duration_sec:.1f}s"
+        #     output_img_draw.text(
+        #         (
+        #             output_width * self._counter_location_x * 0.85,
+        #             output_height * (self._counter_location_y),
+        #         ),
+        #         duration_text,
+        #         font=self._counter_font,
+        #         fill="blue",
+        #     )
 
-        if top_class_name and current_confidence > confidence_threshold:
+        # if top_class_name and current_confidence > confidence_threshold:
+        #     output_img_draw.text(
+        #         (
+        #             output_width * self._counter_location_x * 0.05,
+        #             output_height * self._counter_location_y,
+        #         ),
+        #         f'Pose: {top_class_name}',
+        #         font=self._counter_font,
+        #         fill=self._counter_font_color,
+        #     )
+
+        def find_class(classification):
+            maxi=0
+            classe=""
+            if classification is not None:
+                for key in classification.keys():
+                    if classification[key]>maxi:
+                        maxi=classification[key]
+                        classe=key
+            return classe
+
+        classe=find_class(pose_classification)
+
+        output_img_draw.text(
+            (
+                output_width * self._counter_location_x * 0.05,
+                output_height * self._counter_location_y,
+            ),
+            str(classe),
+            font=self._counter_font,
+            fill=self._counter_font_color,
+        )
+
+        classes_history = []
+        for classification in self._pose_classification_history:
+            classes_history.append(find_class(classification))
+
+        current_class=classe
+        count=0
+        for el in reversed(classes_history):
+            if el==current_class:
+                count=count+1
+            else:
+                break
+
+
+        output_img_draw.text(
+            (
+                output_width * self._counter_location_x * 0.85,
+                output_height * (self._counter_location_y),
+            ),
+            str(round(count/30,1))+" s",
+            font=self._counter_font,
+            fill=self._counter_font_color,
+        )
+
+        def draw_left_time(hist_len):
+
+            time_passed=hist_len/30 #s
+            time_left=5-time_passed
+            time_left_round=int(5-time_passed)
+
+            factor=abs(time_left_round-time_left)*0.4+0.1
+
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size=output_height * factor)
+
             output_img_draw.text(
                 (
-                    output_width * self._counter_location_x * 0.05,
-                    output_height * self._counter_location_y,
+                    output_width * 0.3,
+                    output_height * 0.3,
                 ),
-                f'Pose: {top_class_name}',
-                font=self._counter_font,
+                str(time_left_round),
+                font=font,
                 fill=self._counter_font_color,
             )
+
+        hist_len=len(classes_history)
+        if hist_len<30*5:
+            draw_left_time(hist_len)
 
         return output_img
 

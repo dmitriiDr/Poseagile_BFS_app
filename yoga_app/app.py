@@ -10,6 +10,7 @@ from PoseClassification.utils import EMADictSmoothing, RepetitionCounter
 from PoseClassification.visualize import PoseClassificationVisualizer
 import tempfile
 import subprocess
+import os
 
 class PoseClassifierTransformer(VideoTransformerBase):
     def __init__(self):
@@ -29,13 +30,22 @@ class PoseClassifierTransformer(VideoTransformerBase):
         )
         self.video_fps = 20
         self.pose_classification_visualizer._fps = self.video_fps
+        self.counter = 0
 
     def transform(self, frame):
+        self.counter += 1
         image = frame.to_ndarray(format="bgr24")
         image = cv2.resize(image, (self.fixed_width, self.fixed_height))
         input_frame_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        result = self.pose_tracker.process(image=input_frame_rgb)
-        pose_landmarks_proto = result.pose_landmarks
+
+        if self.counter > 30*5:  # 5 seconds at 30 fps
+            result = self.pose_tracker.process(image=input_frame_rgb)
+            pose_landmarks_proto = result.pose_landmarks
+        else:
+            pose_landmarks_proto = None
+
+        # result = self.pose_tracker.process(image=input_frame_rgb)
+        # pose_landmarks_proto = result.pose_landmarks
 
         output_frame = input_frame_rgb.copy()
         pose_classification = None
@@ -104,7 +114,7 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
         success, input_frame = video_cap.read()
         if not success:
             break
-
+        
         input_frame_rgb = cv2.cvtColor(input_frame, cv2.COLOR_BGR2RGB)
         result = pose_tracker.process(image=input_frame_rgb)
         pose_landmarks = result.pose_landmarks
@@ -161,42 +171,104 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
     return final_output_path
 
 # --- Streamlit UI ---
-st.set_page_config(layout="centered")
+st.set_page_config(layout="wide")
 st.title("Pose Classification")
+
 
 option = st.radio("Choose input source:", ("Webcam (Live)", "Upload a video"))
 
-if option == "Webcam (Live)":
-    st.subheader("Live Pose Classification via Webcam")
-    webrtc_streamer(
-        key="live-pose",
-        video_transformer_factory=PoseClassifierTransformer,
-        media_stream_constraints={"video": True, "audio": False},
-        async_transform=True
-    )
+col1, col2 = st.columns([5, 3])  # Wide left for video, narrow right for posture examples
 
-elif option == "Upload a video":
-    st.subheader("Pose Classification from Uploaded Video")
+with col1:
+    if option == "Webcam (Live)":
+        st.subheader("Live Pose Classification via Webcam")
+        webrtc_streamer(
+            key="live-pose",
+            video_transformer_factory=PoseClassifierTransformer,
+            media_stream_constraints={"video": True, "audio": False},
+            async_transform=True
+        )
 
-    video_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"], key="video-uploader")
+    elif option == "Upload a video":
+        st.subheader("Pose Classification from Uploaded Video")
+        video_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"], key="video-uploader")
 
-    if video_file is not None:
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(video_file.read())
+        if video_file is not None:
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(video_file.read())
 
-        video_placeholder = st.empty()  # Placeholder to show the video after processing
+            video_placeholder = st.empty()
+
+            if st.button("Run Pose Classification"):
+                with st.spinner("Processing video..."):
+                    output_path = process_video(tfile.name)
+                    st.success("Processing complete!")
+                    video_placeholder.video(output_path)
+                    with open(output_path, 'rb') as f:
+                        st.download_button("Download Result", f, file_name="classified_result.mp4")
+
+with col2:
+    st.markdown("### Possible Postures")
+
+    image_names = [
+        "tree.png", "warrior.png", 'downdog.png', 'goddes.png'
+    ]
+
+    # Split images into two groups
+    row1, row2 = image_names[:2], image_names[2:]
+
+    # Row 1
+    cols1 = st.columns(3)
+    for col, img_name in zip(cols1, row1):
+        full_path = os.path.join("pose_samples_examples", img_name)
+        with col:
+            if os.path.exists(full_path):
+                st.image(full_path, use_container_width=True)
+            else:
+                st.warning(f"Not found: {img_name}")
+
+    # Row 2
+    cols2 = st.columns(3)
+    for col, img_name in zip(cols2, row2):
+        full_path = os.path.join("pose_samples_examples", img_name)
+        with col:
+            if os.path.exists(full_path):
+                st.image(full_path, use_container_width=True)
+            else:
+                st.warning(f"Not found: {img_name}")
 
 
-        if st.button("Run Pose Classification"):
-            with st.spinner("Processing video..."):
-                output_path = process_video(tfile.name)
-                # output_path = process_video(final_output_path)
+# if option == "Webcam (Live)":
+#     st.subheader("Live Pose Classification via Webcam")
+#     webrtc_streamer(
+#         key="live-pose",
+#         video_transformer_factory=PoseClassifierTransformer,
+#         media_stream_constraints={"video": True, "audio": False},
+#         async_transform=True
+#     )
+
+# elif option == "Upload a video":
+#     st.subheader("Pose Classification from Uploaded Video")
+
+#     video_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"], key="video-uploader")
+
+#     if video_file is not None:
+#         tfile = tempfile.NamedTemporaryFile(delete=False)
+#         tfile.write(video_file.read())
+
+#         video_placeholder = st.empty()  # Placeholder to show the video after processing
+
+
+#         if st.button("Run Pose Classification"):
+#             with st.spinner("Processing video..."):
+#                 output_path = process_video(tfile.name)
+#                 # output_path = process_video(final_output_path)
                 
-                st.success("Processing complete!")
-                with open('result_final.mp4', 'rb') as video_file:
-                    video_bytes = video_file.read()
-                    st.video(video_bytes)
-                # video_placeholder.video(output_path)  # Show the result video immediately
+#                 st.success("Processing complete!")
+#                 with open('result_final.mp4', 'rb') as video_file:
+#                     video_bytes = video_file.read()
+#                     st.video(video_bytes)
+#                 # video_placeholder.video(output_path)  # Show the result video immediately
 
-                with open(output_path, 'rb') as f:
-                    st.download_button("Download Result", f, file_name="classified_result.mp4")
+#                 with open(output_path, 'rb') as f:
+#                     st.download_button("Download Result", f, file_name="classified_result.mp4")
