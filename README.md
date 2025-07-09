@@ -21,13 +21,19 @@ User interface is minimal and still under development
 If you notice bugs or have suggestions, please let us know.
 
 # Install poetry
+```bash
 curl -sSL https://install.python-poetry.org | python3
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 poetry install
+```
 
 # with a video already recorded
+```bash
 poetry run python yoga_app/yoga.py --video input.mp4 --output output_yoga.mp4
+```
 
 # without a video recorded (webcam is required)
+```bash
 poetry run python yoga_app/yoga.py --output output_yoga.mp4
+```
