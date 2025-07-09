@@ -202,10 +202,22 @@ col1, col2 = st.columns([9, 5])  # Wide left for video, narrow right for posture
 with col1:
     if option == "Webcam (Live)":
         st.subheader("Live Pose Classification via Webcam")
+
+        # Audio autoplay
+        st.markdown(
+            """
+            <audio autoplay loop>
+                <source src="yoga_app/meditation.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            """,
+            unsafe_allow_html=True
+        )
+
         webrtc_streamer(
             key="live-pose",
             video_transformer_factory=PoseClassifierTransformer,
-            media_stream_constraints={"video": True, "audio": False},
+            media_stream_constraints={"video": True, "audio": True},
             async_transform=True
         )
 
