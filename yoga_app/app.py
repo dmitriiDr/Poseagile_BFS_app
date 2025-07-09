@@ -172,12 +172,32 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
 
 # --- Streamlit UI ---
 st.set_page_config(layout="wide")
-st.title("Pose Classification")
+st.markdown("""
+    <style>
+        .main .block-container {
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            padding-left: 1rem;
+            padding-right: 0rem;
+        }
+        .css-1v0mbdj.etr89bj1 {
+            justify-content: center;
+        }
+    </style>
+""", unsafe_allow_html=True)
+col_logo, col_title = st.columns([1, 20])
+
+with col_logo:
+    st.image("logo.png", width=100)
+
+with col_title:
+    st.markdown("<h1 style='margin-top: -10px;'>BambooYoga</h1>", unsafe_allow_html=True)
+# st.subheader('Yoga pose detection app!')
 
 
 option = st.radio("Choose input source:", ("Webcam (Live)", "Upload a video"))
 
-col1, col2 = st.columns([5, 3])  # Wide left for video, narrow right for posture examples
+col1, col2 = st.columns([9, 5])  # Wide left for video, narrow right for posture examples
 
 with col1:
     if option == "Webcam (Live)":
