@@ -20,7 +20,7 @@ def main(video_path=None, output_path='result.mp4'):
 
         out_video = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), video_fps, (video_width, video_height))
 
-        pose_samples_folder = 'yoga_poses'
+        pose_samples_folder = 'yoga_app/yoga_poses'
         pose_tracker = mp_pose.Pose()
         pose_embedder = FullBodyPoseEmbedding()
         pose_classifier = PoseClassifier(
