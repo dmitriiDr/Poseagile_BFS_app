@@ -32,5 +32,5 @@ poetry install
 
 # to run the app
 ```bash
-poetry run streamlit run yoga_app/yoga.py
+poetry run streamlit run yoga_app/app.py
 ```
