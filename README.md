@@ -30,12 +30,7 @@ source ~/.bashrc
 poetry install
 ```
 
-# with a video already recorded
+# to run the app
 ```bash
-poetry run python yoga_app/yoga.py --video input.mp4 --output output_yoga.mp4
-```
-
-# without a video recorded (webcam is required)
-```bash
-poetry run python yoga_app/yoga.py --output output_yoga.mp4
+poetry run streamlit run yoga_app/yoga.py
 ```
