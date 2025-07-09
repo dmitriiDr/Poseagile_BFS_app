@@ -202,6 +202,17 @@ col1, col2 = st.columns([9, 5])  # Wide left for video, narrow right for posture
 with col1:
     if option == "Webcam (Live)":
         st.subheader("Live Pose Classification via Webcam")
+
+        st.markdown(
+        """
+        <audio autoplay loop>
+            <source src="meditation.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        """,
+        unsafe_allow_html=True
+        )
+
         webrtc_streamer(
             key="live-pose",
             video_transformer_factory=PoseClassifierTransformer,
@@ -256,39 +267,3 @@ with col2:
                 st.image(full_path, use_container_width=True)
             else:
                 st.warning(f"Not found: {img_name}")
-
-
-# if option == "Webcam (Live)":
-#     st.subheader("Live Pose Classification via Webcam")
-#     webrtc_streamer(
-#         key="live-pose",
-#         video_transformer_factory=PoseClassifierTransformer,
-#         media_stream_constraints={"video": True, "audio": False},
-#         async_transform=True
-#     )
-
-# elif option == "Upload a video":
-#     st.subheader("Pose Classification from Uploaded Video")
-
-#     video_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"], key="video-uploader")
-
-#     if video_file is not None:
-#         tfile = tempfile.NamedTemporaryFile(delete=False)
-#         tfile.write(video_file.read())
-
-#         video_placeholder = st.empty()  # Placeholder to show the video after processing
-
-
-#         if st.button("Run Pose Classification"):
-#             with st.spinner("Processing video..."):
-#                 output_path = process_video(tfile.name)
-#                 # output_path = process_video(final_output_path)
-                
-#                 st.success("Processing complete!")
-#                 with open('result_final.mp4', 'rb') as video_file:
-#                     video_bytes = video_file.read()
-#                     st.video(video_bytes)
-#                 # video_placeholder.video(output_path)  # Show the result video immediately
-
-#                 with open(output_path, 'rb') as f:
-#                     st.download_button("Download Result", f, file_name="classified_result.mp4")
