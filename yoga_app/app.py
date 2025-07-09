@@ -11,6 +11,7 @@ from PoseClassification.visualize import PoseClassificationVisualizer
 import tempfile
 import subprocess
 import os
+import base64
 
 class PoseClassifierTransformer(VideoTransformerBase):
     def __init__(self):
@@ -170,6 +171,17 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
 
     return final_output_path
 
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio autoplay loop>
+                <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+        """
+        st.markdown(md, unsafe_allow_html=True)
+
 # --- Streamlit UI ---
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -204,20 +216,13 @@ with col1:
         st.subheader("Live Pose Classification via Webcam")
 
         # Audio autoplay
-        st.markdown(
-            """
-            <audio autoplay loop>
-                <source src="yoga_app/meditation.mp3" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-            """,
-            unsafe_allow_html=True
-        )
+        # autoplay_audio("yoga_app/meditation.mp3")
+        st.audio("yoga_app/meditation.mp3", format="audio/mp3", loop=True, autoplay=True)
 
         webrtc_streamer(
             key="live-pose",
             video_transformer_factory=PoseClassifierTransformer,
-            media_stream_constraints={"video": True, "audio": True},
+            media_stream_constraints={"video": True, "audio": False},
             async_transform=True
         )
 
