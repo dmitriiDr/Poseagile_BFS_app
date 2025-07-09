@@ -19,7 +19,7 @@ class PoseClassifierTransformer(VideoTransformerBase):
         self.pose_tracker = mp_pose.Pose()
         self.pose_embedder = FullBodyPoseEmbedding()
         self.pose_classifier = PoseClassifier(
-            pose_samples_folder='yoga_poses',
+            pose_samples_folder='yoga_app/yoga_poses',
             pose_embedder=self.pose_embedder,
             top_n_by_max_distance=30,
             top_n_by_mean_distance=10
@@ -101,7 +101,7 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
     pose_tracker = mp_pose.Pose()
     pose_embedder = FullBodyPoseEmbedding()
     pose_classifier = PoseClassifier(
-        pose_samples_folder='yoga_poses',
+        pose_samples_folder='yoga_app/yoga_poses',
         pose_embedder=pose_embedder,
         top_n_by_max_distance=30,
         top_n_by_mean_distance=10
@@ -188,7 +188,7 @@ st.markdown("""
 col_logo, col_title = st.columns([1, 20])
 
 with col_logo:
-    st.image("logo.png", width=100)
+    st.image("yoga_app/logo.png", width=100)
 
 with col_title:
     st.markdown("<h1 style='margin-top: -10px;'>BambooYoga</h1>", unsafe_allow_html=True)
@@ -240,7 +240,7 @@ with col2:
     # Row 1
     cols1 = st.columns(3)
     for col, img_name in zip(cols1, row1):
-        full_path = os.path.join("pose_samples_examples", img_name)
+        full_path = os.path.join("yoga_app/pose_samples_examples", img_name)
         with col:
             if os.path.exists(full_path):
                 st.image(full_path, use_container_width=True)
@@ -250,7 +250,7 @@ with col2:
     # Row 2
     cols2 = st.columns(3)
     for col, img_name in zip(cols2, row2):
-        full_path = os.path.join("pose_samples_examples", img_name)
+        full_path = os.path.join("yoga_app/pose_samples_examples", img_name)
         with col:
             if os.path.exists(full_path):
                 st.image(full_path, use_container_width=True)
