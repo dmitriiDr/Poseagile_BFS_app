@@ -98,6 +98,7 @@ def process_video(input_video_path, output_video_path='result_raw.mp4'):
     )
     pose_classification_filter = EMADictSmoothing(window_size=10, alpha=0.2)
     pose_classification_visualizer = PoseClassificationVisualizer(plot_x_max=3000, plot_y_max=10)
+    pose_classification_visualizer._fps = video_fps
 
     while True:
         success, input_frame = video_cap.read()
@@ -188,11 +189,11 @@ elif option == "Upload a video":
 
         if st.button("Run Pose Classification"):
             with st.spinner("Processing video..."):
-                # output_path = process_video(tfile.name)
-                output_path = process_video(final_output_path)
+                output_path = process_video(tfile.name)
+                # output_path = process_video(final_output_path)
                 
                 st.success("Processing complete!")
-                with open('result.mp4', 'rb') as video_file:
+                with open('result_final.mp4', 'rb') as video_file:
                     video_bytes = video_file.read()
                     st.video(video_bytes)
                 # video_placeholder.video(output_path)  # Show the result video immediately
